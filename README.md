@@ -77,4 +77,4 @@ Urutan yang disarankan: US-01, US-02, US-03, US-04, US-05, US-06, lalu fitur bon
 - **Nama usaha:** Lily Shop
 - **Pembuat:** Nur Iliyanie
 - **Link aplikasi:** https://katalog-umkm-nuriliyanie.vercel.app
-- **Fitur bonus yang dikerjakan:** US-07 (List produk dari database), US-08 (Tambah produk), US-09 (Ubah produk), US-10 (Hapus produk), US-11 (Filter kategori atau pencarian), US-12 (Pilih jumlah atau varian)
+- **Fitur bonus yang dikerjakan:** US-07 (List produk dari database), US-08 (Tambah produk), US-09 (Ubah produk), US-10 (Hapus produk), US-11 (Filter kategori atau pencarian), US-12 (Pilih jumlah atau varian), US-13 (PWA)
