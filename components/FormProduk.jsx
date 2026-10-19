@@ -37,6 +37,8 @@ export default function FormProduk({
         </div>
       )}
 
+      {produk.id && <input type="hidden" name="id" defaultValue={produk.id} />}
+
       <Input
         label="Nama produk"
         name="nama"

@@ -220,3 +220,173 @@ export async function tambahProduk(prevState, formData) {
     redirect("/admin");
   }
 }
+
+export async function ubahProduk(idOrPrevState, prevStateOrFormData, maybeFormData) {
+  let id = null;
+  let data = null;
+
+  if (typeof idOrPrevState === "string" || typeof idOrPrevState === "number") {
+    id = idOrPrevState;
+    data =
+      maybeFormData instanceof FormData
+        ? maybeFormData
+        : prevStateOrFormData instanceof FormData
+        ? prevStateOrFormData
+        : null;
+  } else {
+    data =
+      prevStateOrFormData instanceof FormData
+        ? prevStateOrFormData
+        : idOrPrevState instanceof FormData
+        ? idOrPrevState
+        : null;
+    id = data?.get("id");
+  }
+
+  if (!id) {
+    return { error: "ID produk tidak ditemukan." };
+  }
+
+  const nama = String(data?.get("nama") || "").trim();
+  const hargaRaw = data?.get("harga");
+  const stokRaw = data?.get("stok");
+  const deskripsi = String(data?.get("deskripsi") || "").trim();
+  const kategori = String(data?.get("kategori") || "").trim();
+  const fotoUrl = String(data?.get("foto_url") || "").trim();
+
+  // Validasi input di sisi server
+  if (!nama) {
+    return { error: "Nama produk wajib diisi." };
+  }
+  if (nama.length < 3) {
+    return { error: "Nama produk minimal 3 karakter." };
+  }
+
+  const harga = parseInt(hargaRaw, 10);
+  if (isNaN(harga) || harga < 0) {
+    return { error: "Harga produk harus berupa angka valid dan minimal 0." };
+  }
+
+  const stok = parseInt(stokRaw, 10);
+  if (
+    stokRaw === null ||
+    stokRaw === undefined ||
+    stokRaw === "" ||
+    isNaN(stok) ||
+    stok < 0
+  ) {
+    return { error: "Stok produk harus berupa angka valid dan minimal 0." };
+  }
+
+  if (!deskripsi) {
+    return { error: "Deskripsi produk wajib diisi." };
+  }
+
+  let shouldRedirect = false;
+
+  try {
+    const supabase = await createSessionClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { error: "Akses ditolak: Anda harus login terlebih dahulu." };
+    }
+
+    const payload = {
+      nama,
+      harga,
+      deskripsi,
+      kategori: kategori || null,
+      foto_url: fotoUrl || null,
+      stok,
+    };
+
+    let { error: updateError } = await supabase
+      .from("produk")
+      .update(payload)
+      .eq("id", id);
+
+    // Fallback jika tabel Supabase belum memiliki kolom stok
+    if (
+      updateError &&
+      updateError.message &&
+      updateError.message.includes("stok")
+    ) {
+      delete payload.stok;
+      const retry = await supabase
+        .from("produk")
+        .update(payload)
+        .eq("id", id);
+      updateError = retry.error;
+    }
+
+    if (updateError) {
+      return { error: `Gagal memperbarui produk: ${updateError.message}` };
+    }
+
+    shouldRedirect = true;
+  } catch (err) {
+    return {
+      error: err.message || "Terjadi kesalahan saat memperbarui produk.",
+    };
+  }
+
+  if (shouldRedirect) {
+    revalidatePath("/admin");
+    revalidatePath("/");
+    revalidatePath(`/produk/${id}`);
+    redirect("/admin");
+  }
+}
+
+export async function hapusProduk(idOrFormData) {
+  let id = null;
+  if (idOrFormData instanceof FormData) {
+    id = idOrFormData.get("id");
+  } else {
+    id = idOrFormData;
+  }
+
+  if (!id) {
+    return { error: "ID produk tidak ditemukan.", success: false };
+  }
+
+  try {
+    const supabase = await createSessionClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return {
+        error: "Akses ditolak: Anda harus login terlebih dahulu.",
+        success: false,
+      };
+    }
+
+    const { error: deleteError } = await supabase
+      .from("produk")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) {
+      return {
+        error: `Gagal menghapus produk: ${deleteError.message}`,
+        success: false,
+      };
+    }
+
+    revalidatePath("/admin");
+    revalidatePath("/");
+    return { success: true };
+  } catch (err) {
+    return {
+      error: err.message || "Terjadi kesalahan saat menghapus produk.",
+      success: false,
+    };
+  }
+}
