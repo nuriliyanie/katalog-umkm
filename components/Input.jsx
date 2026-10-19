@@ -6,9 +6,9 @@ export default function Input({ label, name, type = "text", textarea = false, ..
     <label className="flex flex-col gap-1.5 text-sm font-semibold">
       {label}
       {textarea ? (
-        <textarea name={name} rows={4} className={kelas} {...props} />
+        <textarea id={props.id || name} name={name} rows={4} className={kelas} {...props} />
       ) : (
-        <input name={name} type={type} className={kelas} {...props} />
+        <input id={props.id || name} name={name} type={type} className={kelas} {...props} />
       )}
     </label>
   );

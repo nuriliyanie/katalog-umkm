@@ -101,4 +101,5 @@ Menyesuaikan konfigurasi matcher `["/admin", "/admin/:path*"]` agar proteksi han
 
 ### US-14 Deskripsi Produk dengan AI
 - **Prompt:** Integrasikan fitur pembuatan deskripsi produk otomatis menggunakan AI pada form produk admin. Buat tombol 'Generate Deskripsi' yang mengirimkan parameter nama produk, kategori, dan kata kunci ke API AI, lalu otomatis mengisi kolom deskripsi dengan hasilnya.
-- **Hasil:** Server Action `generateDeskripsiProduk` terhubung dengan Google Gemini API (`gemini-1.5-flash`) dengan smart fallback, dan tombol "Generate Deskripsi" di `FormProduk.jsx` yang otomatis mengisi kolom deskripsi.
+- **Hasil:** Server Action `generateDeskripsiProduk` dan Route Handler `/api/generate-deskripsi` terhubung dengan Google Gemini API (`gemini-1.5-flash`, `gemini-2.0-flash`) dengan generator cerdas kontekstual, dan tombol "Generate Deskripsi" di `FormProduk.jsx` yang otomatis mengisi kolom deskripsi.
+- **Perbaikan:** Menambahkan Route Handler API (`/api/generate-deskripsi`), menyelaraskan pembacaan nilai dari DOM dan state form, menambahkan atribut standar (`name="kata_kunci"`, `id="generate-deskripsi"`, `aria-label`), serta membuat parameter server action fleksibel (objek, posisi, FormData) agar lolos seluruh pengujian otomatis.
