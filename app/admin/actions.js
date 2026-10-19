@@ -390,3 +390,77 @@ export async function hapusProduk(idOrFormData) {
     };
   }
 }
+
+export async function generateDeskripsiProduk({ nama, kategori, kataKunci }) {
+  if (!nama || !nama.trim()) {
+    return { error: "Nama produk wajib diisi sebelum membuat deskripsi." };
+  }
+
+  // Verifikasi autentikasi admin
+  try {
+    const supabase = await createSessionClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { error: "Akses ditolak: Anda harus login terlebih dahulu." };
+    }
+  } catch {
+    return { error: "Gagal memverifikasi sesi admin." };
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (apiKey) {
+    try {
+      const prompt = `Buatkan deskripsi produk yang menarik, ramah, dan menjual untuk katalog UMKM di Indonesia.
+Nama Produk: ${nama}
+Kategori: ${kategori || "Umum"}
+Kata Kunci/Poin Khusus: ${kataKunci || "-"}
+
+Instruksi:
+- Tuliskan dalam 2-3 kalimat yang menarik dan menggugah minat pembeli.
+- Langsung berikan teks deskripsi saja tanpa tanda kutip dan tanpa kata pembuka/penutup.`;
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: prompt }],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 300,
+            },
+          }),
+        }
+      );
+
+      const data = await response.json();
+      const hasilTeks =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+      if (hasilTeks) {
+        return { deskripsi: hasilTeks };
+      }
+    } catch (err) {
+      console.error("Gemini API error, menggunakan fallback:", err);
+    }
+  }
+
+  // Fallback template deskripsi cerdas jika API key belum disetel
+  const keywordsText = kataKunci ? ` dengan cita rasa/kualitas ${kataKunci}` : "";
+  const kategoriText = kategori ? ` dalam kategori ${kategori}` : "";
+  const deskripsiCerdas = `${nama} merupakan produk unggulan${kategoriText}${keywordsText}. Dibuat dengan bahan-bahan pilihan bermutu tinggi dan proses yang teliti untuk menjamin kepuasan Anda. Sangat cocok untuk kebutuhan sehari-hari maupun sajian istimewa bersama keluarga.`;
+
+  return { deskripsi: deskripsiCerdas };
+}
