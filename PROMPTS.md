@@ -97,7 +97,7 @@ Menyesuaikan konfigurasi matcher `["/admin", "/admin/:path*"]` agar proteksi han
 
 ### US-13 Progressive Web App (PWA)
 - **Prompt:** Konfigurasikan aplikasi ini agar menjadi Progressive Web App (PWA) yang dapat diinstal di perangkat ponsel pintar. Buat file manifest.json lengkap dengan ikon aplikasi dan daftarkan service worker untuk caching aset dasar.
-- **Hasil:** Dibuat `public/manifest.json`, service worker `public/sw.js` untuk caching aset statis dasar, dan komponen `PWARegistration.jsx` di `RootLayout`.
+- **Hasil:** Dibuat `public/manifest.json`, service worker `public/sw.js` untuk caching aset statis dasar, komponen `PWARegistration.jsx` di `RootLayout`, serta komponen `TombolInstallPWA.jsx` di `Header.jsx` untuk mempermudah pemasangan aplikasi secara langsung di perangkat pengguna.
 
 ### US-14 Deskripsi Produk dengan AI
 - **Prompt:** Integrasikan fitur pembuatan deskripsi produk otomatis menggunakan AI pada form produk admin. Buat tombol 'Generate Deskripsi' yang mengirimkan parameter nama produk, kategori, dan kata kunci ke API AI, lalu otomatis mengisi kolom deskripsi dengan hasilnya.
